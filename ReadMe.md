@@ -12,3 +12,6 @@ This feed should be included and enabled by default in the OpenWrt buildroot. To
     ./scripts/feeds install -a -p homewsn
 
 The packages should now appear in menuconfig.
+
+Update the homewsn feed:
+    ./scripts/feeds update homewsn
