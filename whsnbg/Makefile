@@ -18,12 +18,13 @@ PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
 
 # Remote source
-#PKG_SOURCE_PROTO:=git
-#PKG_SOURCE_URL:=https://github.com/homewsn/whsnbg.git
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/homewsn/whsnbg.git
 # Always the latest version
-#PKG_SOURCE_VERSION:=HEAD
+PKG_SOURCE_VERSION:=HEAD
+# Version 1.1
 #PKG_SOURCE_VERSION:=63236f501b3ba1b09a152fa252e9a783270208da
-#PKG_SOURCE:=$(PKG_SOURCE_SUBDIR).tar.gz
+PKG_SOURCE:=$(PKG_SOURCE_SUBDIR).tar.gz
 
 
 PKG_BUILD_PARALLEL:=1
@@ -128,10 +129,10 @@ define Package/whsnbg-cc2531-usb/description
 endef
 
 # Local source in /src directory
-define Build/Prepare
-	mkdir -p $(PKG_BUILD_DIR)/src
-	$(CP) ./src/* $(PKG_BUILD_DIR)/src/
-endef
+#define Build/Prepare
+#	mkdir -p $(PKG_BUILD_DIR)/src
+#	$(CP) ./src/* $(PKG_BUILD_DIR)/src/
+#endef
 
 define Build/Compile
 	CC="$(TARGET_CC)" \
