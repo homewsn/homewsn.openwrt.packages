@@ -125,7 +125,8 @@ define Package/whsnbg/description
 endef
 
 define Package/whsnbg-cc2531-usb/description
- dsdfgsdfgdf
+ This package provides script files to run whsnbg automatically
+ when cc2531 dongle is connected.
 endef
 
 # Local source in /src directory
