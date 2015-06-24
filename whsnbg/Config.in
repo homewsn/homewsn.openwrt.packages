@@ -17,7 +17,7 @@ menu  "Configuration"
 
 	config WHSNBG_RULES_ENGINE
 		bool "Rules engine"
-		default y
+		default n
 		help
 			Enables rules engine thread
 
@@ -44,14 +44,14 @@ menu  "Configuration"
 
 		config WHSNBG_SENSOR_DATA_MYSQL
 			bool "Storing decoded data from the sensors in the MySQL database" if WHSNBG_SENSOR_DATA
-			default WHSNBG_SENSOR_DATA
+			default n
 			select PACKAGE_libmysqlclient
 			help
 				Storing decoded data from the sensors in the MySQL database
 
 		config WHSNBG_MQTT_DATA_MYSQL
 			bool "Storing payload from the specific MQTT topics in the MySQL database" if WHSNBG_SENSOR_DATA
-			default WHSNBG_SENSOR_DATA
+			default n
 			select PACKAGE_libmysqlclient
 			help
 				Storing payload from the specific MQTT topics in the MySQL database
