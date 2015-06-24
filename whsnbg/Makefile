@@ -29,58 +29,43 @@ PKG_SOURCE:=$(PKG_SOURCE_SUBDIR).tar.gz
 
 PKG_BUILD_PARALLEL:=1
 
-PKG_INCLPATH:= -I. -I$(STAGING_DIR)/usr/include/mysql
-PKG_LIBPATH:= -L. -L$(STAGING_DIR)/usr/lib/mysql
-
-# Libraries dependencies
-PKG_LIBS:=
-
 # Package dependencies
 PKG_DPNDS:= +libc +libpthread
 PKG_DPNDS+= +WHSNBG_AXTLS_LIBRARY:libaxtls +WHSNBG_OPENSSL_LIBRARY:libopenssl +(WHSNBG_SENSOR_DATA_MYSQL||WHSNBG_MQTT_DATA_MYSQL):libmysqlclient
 
-# Defines
-PKG_DEFS:= -DOPENWRT -DNDEBUG
+# Package make flags
+PKG_MFLAGS:= PREFIX=\".\"
 
 ifneq ($(CONFIG_WHSNBG_DAEMON),)
-  PKG_DEFS+= -DLINUX_DAEMON_VERSION
+  PKG_MFLAGS+= DAEMON_VERSION=1
 endif
-ifeq ($(CONFIG_WHSNBG_DPRINTF),)
-  PKG_DEFS+= -DNDPRINTF
+ifneq ($(CONFIG_WHSNBG_DPRINTF),)
+  PKG_MFLAGS+= DETAILED_LOG=1
 endif
 ifneq ($(CONFIG_WHSNBG_RULES_ENGINE),)
-  PKG_DEFS+= -DRULES_ENGINE
+  PKG_MFLAGS+= RULES_ENGINE=1
 endif
 ifneq ($(CONFIG_WHSNBG_AXTLS_LIBRARY),)
-  PKG_DEFS+= -DAXTLS_LIBRARY
-  PKG_LIBS+= -laxtls
+  PKG_MFLAGS+= TLS_LIB_AXTLS=1
 endif
 ifneq ($(CONFIG_WHSNBG_OPENSSL_LIBRARY),)
-  PKG_DEFS+= -DOPENSSL_LIBRARY
-  PKG_LIBS+= -lssl -lcrypto
-  ifneq ($(CONFIG_WHSNBG_STATIC),)
-    PKG_LIBS+= -lz
-  endif
+  PKG_MFLAGS+= TLS_LIB_OPENSSL=1
 endif
 ifneq ($(CONFIG_WHSNBG_SENSOR_DATA),)
-  PKG_DEFS+= -DSENSOR_DATA
+  PKG_MFLAGS+= SENSOR_DATA_DECODING=1
 endif
 ifneq ($(CONFIG_WHSNBG_SENSOR_DATA_MYSQL),)
-  PKG_DEFS+= -DSENSOR_DATA_MYSQL
+  PKG_MFLAGS+= SENSOR_DATA_STORING=1
 endif
 ifneq ($(CONFIG_WHSNBG_MQTT_DATA_MYSQL),)
-  PKG_DEFS+= -DMQTT_DATA_MYSQL
+  PKG_MFLAGS+= MQTT_DATA_STORING=1
 endif
-ifneq ($(CONFIG_WHSNBG_SENSOR_DATA_MYSQL),$(filter $(CONFIG_WHSNBG_SENSOR_DATA_MYSQL),))
-  PKG_LIBS+= -lmysqlclient
-  ifneq ($(CONFIG_WHSNBG_STATIC),)
-    PKG_LIBS+= -lz
-  endif
-endif
-PKG_LIBS += -lpthread -lgcc_eh -lm
 ifneq ($(CONFIG_WHSNBG_STATIC),)
-  PKG_DPNDS:=
-  PKG_LIBS+= -ldl -static
+  PKG_MFLAGS+= STATIC_LINK=1
+endif
+ifneq ($(CONFIG_WHSNBG_SENSOR_DATA_MYSQL),$(filter $(CONFIG_WHSNBG_MQTT_DATA_MYSQL),))
+  PKG_MFLAGS+= LIBPATH=-L$(STAGING_DIR)/usr/lib/mysql
+  PKG_MFLAGS+= INCLPATH=-I$(STAGING_DIR)/usr/include/mysql
 endif
 
 include $(INCLUDE_DIR)/package.mk
@@ -112,6 +97,7 @@ endef
 
 define Package/whsnbg/conffiles
 /etc/whsnbg.conf
+/etc/whsnbg.pem
 endef
 
 define Package/whsnbg-cc2531-usb/conffiles
@@ -129,27 +115,24 @@ define Package/whsnbg-cc2531-usb/description
  when cc2531 dongle is connected.
 endef
 
-# Local source in /src directory
+# Local source in ../whsnbg directory
 #define Build/Prepare
-#	mkdir -p $(PKG_BUILD_DIR)/src
-#	$(CP) ./src/* $(PKG_BUILD_DIR)/src/
+#	mkdir -p $(PKG_BUILD_DIR)
+#	$(CP) ../whsnbg/* $(PKG_BUILD_DIR)/
 #endef
 
 define Build/Compile
 	CC="$(TARGET_CC)" \
 	CFLAGS="$(TARGET_CFLAGS)" \
 	LDFLAGS="$(TARGET_LDFLAGS)" \
-	TARGET_INCLPATH="$(PKG_INCLPATH)" \
-	TARGET_LIBPATH="$(PKG_LIBPATH)" \
-	TARGET_LIBS="$(PKG_LIBS)" \
-	TARGET_DEFS="$(PKG_DEFS)" \
-	$(MAKE) openwrt -C $(PKG_BUILD_DIR)/src
+	$(MAKE) $(PKG_MFLAGS) -C $(PKG_BUILD_DIR)
 endef
 
 define Package/whsnbg/install
 	$(INSTALL_DIR) $(1)/bin $(1)/etc
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/whsnbg $(1)/bin/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/whsnbg $(1)/bin/
 	$(INSTALL_DATA) ./files/whsnbg.conf $(1)/etc/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/res/whsnbg.pem $(1)/etc/
 endef
 
 define Package/whsnbg-cc2531-usb/install

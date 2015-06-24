@@ -9,12 +9,6 @@ menu  "Configuration"
 		help
 			Builds the daemon version
 
-	config WHSNBG_STATIC
-		bool "Static link"
-		default n
-		help
-			Builds the static link version
-
 	config WHSNBG_DPRINTF
 		bool "Detailed log"
 		default n
@@ -29,9 +23,11 @@ menu  "Configuration"
 
 	choice
 		prompt "TLS support"
-		default WHSNBG_AXTLS_LIBRARY
+		default WHSNBG_NOTLS_LIBRARY
 		help
 			The library to enable TLS support
+		config WHSNBG_NOTLS_LIBRARY
+			bool "None"
 		config WHSNBG_AXTLS_LIBRARY
 			bool "axTLS"
 			select PACKAGE_libaxtls
@@ -60,5 +56,10 @@ menu  "Configuration"
 			help
 				Storing payload from the specific MQTT topics in the MySQL database
 
+	config WHSNBG_STATIC
+		bool "Static link"
+		default n
+		help
+			Builds the static link version
 
 endmenu
